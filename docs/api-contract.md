@@ -107,7 +107,10 @@ Aggregated activity overview used by the dashboard header, cards and chart.
 ```
 `activityType` ∈ `CARD | PAYMENT | CRYPTO`; `byType` contains only types the customer has.
 `status` ∈ `COMPLETED | PENDING | FAILED | REVERSED`. `monthlyCounts` covers every month in
-the window, zero-filled, ascending. `triggeredRules` sorted by `totalContribution` desc.
+the window, zero-filled, ascending. `triggeredRules` sorted by `totalContribution` desc;
+`appliesTo` ∈ `CARD | PAYMENT | CRYPTO | ALL`. For a customer with no transactions,
+`windowFrom`/`windowTo` are null and the lists are empty; `lastActivityAt` in the search
+listing is null in that case too.
 
 ### GET /api/customers/{id}/transactions?type=&status=&page=0&size=25
 

@@ -1,0 +1,137 @@
+.login-screen {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background:
+    radial-gradient(1100px 520px at 50% -10%, #e6ebf4 0%, transparent 62%),
+    linear-gradient(180deg, var(--paper) 0%, #eceff5 100%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 384px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: 0 12px 40px rgba(23, 38, 60, 0.1), var(--shadow-card);
+  overflow: hidden;
+  animation: login-rise 360ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes login-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.login-band {
+  height: 4px;
+  background: linear-gradient(90deg, var(--series-card), var(--series-payment), var(--series-crypto));
+}
+
+.login-body {
+  padding: 30px 30px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-brand-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.login-brand-name .thin {
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.login-title {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.login-subtitle {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 3px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-form .btn {
+  margin-top: 4px;
+  padding: 9px 16px;
+}
+
+.login-hint {
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 14px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.login-hint-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 7px;
+}
+
+.login-cred {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 2px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.login-cred:hover .login-cred-user {
+  text-decoration: underline;
+}
+
+.login-cred-user {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.login-cred-pass {
+  font-family: var(--font-mono);
+}
+
+.login-footer {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}

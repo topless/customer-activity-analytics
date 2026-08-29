@@ -1,0 +1,69 @@
+/* ------------------------------------------------------------------ */
+/* Design tokens — single source of truth for palette / spacing / type */
+/* ------------------------------------------------------------------ */
+
+:root {
+  /* Typography */
+  --font-ui:
+    -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI",
+    system-ui, ui-sans-serif, Helvetica, Arial, sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  /* Ink & paper */
+  --paper: #f2f4f8;
+  --surface: #ffffff;
+  --surface-sunken: #f7f9fc;
+  --ink: #17263c;
+  --ink-soft: #51617a;
+  --ink-faint: #8494ab;
+  --line: #e3e8f0;
+  --line-strong: #c9d3e0;
+
+  /* Top bar (dark ledger frame around the light workspace) */
+  --topbar: #142033;
+  --topbar-line: #263650;
+  --topbar-ink: #eef2f8;
+  --topbar-ink-soft: #93a3bc;
+
+  /* Accent — a single restrained cobalt; everything else is semantic */
+  --accent: #2554c7;
+  --accent-strong: #1c419c;
+  --accent-soft: #e9effc;
+  --focus-ring: #2554c7;
+
+  /* Risk bands (numeric badge + LOW/MEDIUM/HIGH/CRITICAL levels) */
+  --risk-none-bg: #edf1f6;
+  --risk-none-fg: #5c6b80;
+  --risk-none-dot: #9aa8bc;
+  --risk-low-bg: #e0f4e8;
+  --risk-low-fg: #14683e;
+  --risk-low-dot: #23a45c;
+  --risk-medium-bg: #fcf1d2;
+  --risk-medium-fg: #7d5c00;
+  --risk-medium-dot: #d9a514;
+  --risk-high-bg: #fde9d8;
+  --risk-high-fg: #9c430a;
+  --risk-high-dot: #e8752c;
+  --risk-critical-bg: #fce3e3;
+  --risk-critical-fg: #a82525;
+  --risk-critical-dot: #d64545;
+
+  /* Transaction status */
+  --status-reversed-bg: #e9ecf8;
+  --status-reversed-fg: #4b5a9b;
+  --status-reversed-dot: #7583c4;
+
+  /* Activity-type series — shared by chart bars, legend and type chips */
+  --series-card: #3e63dd;
+  --series-payment: #0f8c96;
+  --series-crypto: #8e4ec6;
+
+  /* Elevation & radii */
+  --shadow-card: 0 1px 2px rgba(23, 38, 60, 0.06), 0 1px 1px rgba(23, 38, 60, 0.03);
+  --shadow-pop: 0 6px 20px rgba(23, 38, 60, 0.16);
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+}

@@ -1,0 +1,255 @@
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 14px;
+}
+
+.back-link:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ---------- Header ---------- */
+
+.customer-head {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.customer-title {
+  font-size: 23px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.customer-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px 18px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.meta-item svg {
+  color: var(--ink-faint);
+  flex: none;
+}
+
+.risk-hero {
+  flex: none;
+  min-width: 148px;
+  border-radius: var(--r-md);
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+}
+
+.risk-hero-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.risk-hero-value {
+  font-size: 34px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.risk-hero.band-none {
+  background: var(--risk-none-bg);
+  color: var(--risk-none-fg);
+}
+
+.risk-hero.band-low {
+  background: var(--risk-low-bg);
+  color: var(--risk-low-fg);
+}
+
+.risk-hero.band-medium {
+  background: var(--risk-medium-bg);
+  color: var(--risk-medium-fg);
+}
+
+.risk-hero.band-high {
+  background: var(--risk-high-bg);
+  color: var(--risk-high-fg);
+}
+
+.risk-hero.band-critical {
+  background: var(--risk-critical-bg);
+  color: var(--risk-critical-fg);
+}
+
+/* ---------- Summary cards ---------- */
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.summary-card {
+  padding: 15px 18px 14px;
+}
+
+.summary-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+.summary-value {
+  font-size: 26px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.summary-sub {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+
+.summary-failed {
+  color: var(--risk-critical-fg);
+  font-weight: 650;
+}
+
+.summary-volumes {
+  margin-top: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.summary-volume {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.summary-volume .amount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+/* ---------- Dashboard grid ---------- */
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(280px, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+  align-items: stretch;
+}
+
+@media (max-width: 960px) {
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stack-16 > * + * {
+  margin-top: 16px;
+}
+
+/* ---------- Triggered rules panel ---------- */
+
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 342px;
+  overflow-y: auto;
+}
+
+.rule-row {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.rule-row:last-child {
+  border-bottom: none;
+}
+
+.rule-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rule-name {
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.rule-contribution {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--risk-high-fg);
+  white-space: nowrap;
+}
+
+.rule-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--ink-faint);
+  flex-wrap: wrap;
+}
+
+/* ---------- Not found / page-level states ---------- */
+
+.page-state {
+  padding: 40px 0;
+}

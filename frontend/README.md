@@ -1,32 +1,33 @@
-# React + TypeScript + Vite
+# Customer Activity Analytics — frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React 18-style SPA (React 19 + TypeScript strict + Vite) for the customer care
+console: customer search, activity dashboard (overview cards, SVG activity
+chart, transactions, triggered risk rules) and AI risk analyses.
 
-Currently, two official plugins are available:
+Runtime dependencies are limited to `react`, `react-dom` and
+`react-router-dom`; everything else (chart, styling, fetch client) is
+hand-rolled. The API contract in `../docs/api-contract.md` is mirrored in
+`src/api/types.ts`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Commands
 
-## React Compiler
+- `npm install`
+- `npm run dev` — dev server; proxies `/api` to `$VITE_PROXY_TARGET`
+  (default `http://localhost:8080`)
+- `npm run build` — type-check (`tsc -b`) + production build
+- `npm run lint` — oxlint
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Demo credentials
 
-## Expanding the Oxlint configuration
+`alice / operator123` (operator), `bob / supervisor123` (supervisor).
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Structure
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+- `src/api/` — contract types + fetch client (Bearer token, RFC 7807 errors,
+  401 handling)
+- `src/auth/` — auth context (login, logout, session restore via `/api/auth/me`)
+- `src/pages/` — `/login`, `/` (search), `/customers/:id` (dashboard), 404
+- `src/features/` — dashboard building blocks (chart, overview cards,
+  transactions table, triggered rules, AI analysis panel)
+- `src/components/` — shared badges/chips and UI primitives
+- `src/styles/` — design tokens, base styles, shared component styles
