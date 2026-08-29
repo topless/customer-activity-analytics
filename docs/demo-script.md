@@ -19,7 +19,7 @@ A suggested walkthrough for presenting the application.
 
 ## 3. Activity dashboard (3 min) — spec #1, #2
 
-Open **CUST-10004 · Lukas Weber** (risk 535):
+Open **CUST-10004 · Lukas Weber** (risk 565):
 
 - Overview cards: 50 transactions across the three activity types, volumes per currency.
 - Monthly activity chart: card/payment/crypto mix over six months.
@@ -53,7 +53,7 @@ Open **CUST-10004 · Lukas Weber** (risk 535):
 - `StubLlmClient` vs `AnthropicLlmClient` — same JSON contract; flip to a real model with
   one environment variable (show `ANTHROPIC_API_KEY=... docker compose up` if a key is at
   hand).
-- Tests: `./mvnw test` (18 unit tests, incl. the prompt-pseudonymisation guarantee) and
+- Tests: `./mvnw test` (21 unit tests, incl. the prompt-pseudonymisation guarantee) and
   the Testcontainers journey IT.
 
 ## 6. AI-built methodology (2 min) — assignment focus

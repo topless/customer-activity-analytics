@@ -92,6 +92,10 @@ their own short transaction.
 - Stateless JWT (HS256, self-issued): `POST /api/auth/login` checks BCrypt hashes from the
   `operators` table and returns a signed token (8h TTL); all other endpoints require it
   via Spring Security's resource-server support. CSRF is disabled (no cookie session).
+- Login hardening: an unknown username still costs one BCrypt comparison (no
+  username-existence timing oracle), failures return one generic message, and an
+  in-memory limiter blocks a username after 10 failed attempts in 15 minutes (HTTP 429).
+- Customer search escapes LIKE wildcards, so user input matches literally.
 - The signing secret is configuration (`CAA_JWT_SECRET`); the committed default is for the
   demo only.
 - Data minimisation towards LLM providers as described above; prompts and raw responses

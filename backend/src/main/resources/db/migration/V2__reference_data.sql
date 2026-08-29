@@ -26,6 +26,6 @@ INSERT INTO risk_rules (rule_id, rule_name, applies_to, threshold_logic, weight)
   ('0b000000-0000-0000-0000-000000000008', 'Rapid fiat-to-crypto pass-through', 'CRYPTO',
    'crypto outflow >= 20000 (fiat equivalent) within 72h of incoming wire(s) of comparable value', 30.00),
   ('0b000000-0000-0000-0000-000000000009', 'Activity velocity spike', 'ALL',
-   'transaction count in trailing 7 days > 5x the trailing 90-day daily average', 20.00),
+   '>= 10 transactions in the trailing 7 days AND 7-day count > 5x the count expected from the trailing 90-day daily average; capped at 3 alerts per customer per review window', 20.00),
   ('0b000000-0000-0000-0000-000000000010', 'High-value crypto withdrawal', 'CRYPTO',
    'outgoing transfer to external wallet >= 10000 (fiat equivalent)', 25.00);

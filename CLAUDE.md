@@ -7,7 +7,7 @@ AI risk analysis. Built for the Swissquote platform-engineering assignment.
 ## Layout
 
 - `backend/` — Spring Boot 3.5 (Java 17), Maven wrapper. Package root `com.swissquote.caa`.
-- `frontend/` — React 18 + TypeScript + Vite.
+- `frontend/` — React 19 + TypeScript + Vite.
 - `docs/` — architecture, API contract, AI methodology.
 - `docker-compose.yml` — Postgres (pgvector) + backend + frontend.
 

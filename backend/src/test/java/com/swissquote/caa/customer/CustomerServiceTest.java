@@ -54,6 +54,12 @@ class CustomerServiceTest {
     }
 
     @Test
+    void likeWildcardsInSearchInputAreEscaped() {
+        assertThat(CustomerService.escapeLike("100%_a!b")).isEqualTo("100!%!_a!!b");
+        assertThat(CustomerService.escapeLike("weber")).isEqualTo("weber");
+    }
+
+    @Test
     void unknownCustomerYields404() {
         when(customers.findById(ID)).thenReturn(Optional.empty());
         CustomerService service = new CustomerService(customers, stats, overviewQueries);

@@ -36,7 +36,8 @@ class AuthServiceTest {
         AppProperties properties = new AppProperties(
             new AppProperties.Jwt(SECRET, Duration.ofHours(8)), null, null, null);
         return new AuthService(operators, new BCryptPasswordEncoder(),
-            new NimbusJwtEncoder(new ImmutableSecret<>(key)), properties);
+            new NimbusJwtEncoder(new ImmutableSecret<>(key)), properties,
+            new LoginAttemptService());
     }
 
     @Test

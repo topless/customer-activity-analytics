@@ -101,6 +101,23 @@ class CustomerJourneyIT {
 
     @Test
     @Order(4)
+    void clientErrorsKeepClientStatusCodes() {
+        String token = login();
+        ResponseEntity<JsonNode> badParam = rest.exchange("/api/customers?page=-1",
+            HttpMethod.GET, new HttpEntity<>(null, bearer(token)), JsonNode.class);
+        assertThat(badParam.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+        ResponseEntity<String> unknownRoute = rest.exchange("/api/nonexistent",
+            HttpMethod.GET, new HttpEntity<>(null, bearer(token)), String.class);
+        assertThat(unknownRoute.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+        ResponseEntity<String> wrongMethod = rest.exchange("/api/auth/login",
+            HttpMethod.GET, new HttpEntity<>(null, bearer(token)), String.class);
+        assertThat(wrongMethod.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @Test
+    @Order(5)
     void unknownCustomerIs404WithProblemDetail() {
         String token = login();
         ResponseEntity<JsonNode> response = rest.exchange(

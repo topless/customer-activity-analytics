@@ -19,6 +19,17 @@ const dateFormat = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
 })
 
+// Date-only strings (e.g. dateOfBirth "1988-04-12") parse as UTC midnight; formatting them
+// in the viewer's zone would shift the day west of UTC, so those pin to UTC.
+const dateOnlyFormat = new Intl.DateTimeFormat('en-GB', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/
+
 const dateTimeFormat = new Intl.DateTimeFormat('en-GB', {
   day: '2-digit',
   month: 'short',
@@ -43,7 +54,8 @@ export function formatInt(n: number): string {
 
 /** `12 Aug 2026` */
 export function formatDate(iso: string): string {
-  return dateFormat.format(new Date(iso))
+  const format = DATE_ONLY.test(iso) ? dateOnlyFormat : dateFormat
+  return format.format(new Date(iso))
 }
 
 /** `12 Aug 2026, 14:03` */

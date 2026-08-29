@@ -12,18 +12,19 @@ const SERIES = [
 const HEIGHT = 248
 const MARGIN = { top: 12, right: 10, bottom: 28, left: 42 }
 
-/** Round up to a "nice" axis maximum and return its tick values. */
+/** Round up to a "nice" axis maximum and return its tick values (integers — counts). */
 function niceScale(maxValue: number): { max: number; ticks: number[] } {
   const target = Math.max(maxValue, 1)
   const rough = target / 4
   const magnitude = 10 ** Math.floor(Math.log10(rough))
   let step = magnitude
-  for (const factor of [1, 2, 2.5, 5, 10]) {
+  for (const factor of [1, 2, 5, 10]) {
     if (rough <= factor * magnitude) {
       step = factor * magnitude
       break
     }
   }
+  step = Math.max(1, Math.round(step))
   const max = Math.ceil(target / step) * step
   const ticks: number[] = []
   for (let v = 0; v <= max + step / 2; v += step) ticks.push(v)
@@ -164,7 +165,10 @@ export function MonthlyChart({ months }: { months: MonthlyCount[] }) {
                       height={baseline - top}
                       rx={1.5}
                       fill={series.color}
-                    />
+                    >
+                      {/* value access without a pointer (screen readers, native tooltip) */}
+                      <title>{`${formatMonth(month.month, true)}: ${value} ${series.label.toLowerCase()}`}</title>
+                    </rect>
                   )
                 })}
                 {i % labelEvery === 0 ? (

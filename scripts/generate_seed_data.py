@@ -80,8 +80,10 @@ def eth_addr() -> str:
     return "0x" + "".join(rng.choices("0123456789abcdef", k=40))
 
 
-def tx_hash() -> str:
-    return "0x" + "".join(rng.choices("0123456789abcdef", k=64))
+def tx_hash(coin: str) -> str:
+    """BTC txids are bare hex; EVM chains prefix 0x."""
+    digest = "".join(rng.choices("0123456789abcdef", k=64))
+    return digest if coin == "BTC" else "0x" + digest
 
 
 MERCHANTS = [
@@ -188,7 +190,7 @@ def add_crypto(c: Customer, when: datetime, coin_amount: float, coin: str, outgo
             "blockchain": coin,
             "wallet_address_from": own if outgoing else other,
             "wallet_address_to": other if outgoing else own,
-            "tx_hash": tx_hash(),
+            "tx_hash": tx_hash(coin),
             "exchange_name": exchange,
         },
     }
@@ -283,10 +285,11 @@ def build_lukas(c: Customer):
                 status="FAILED")
 
     # Fiat-to-crypto pass-through: BTC bought on Kraken within 72h of the big inbound wires,
-    # then moved on to the same unattributed wallet
+    # then moved on to the same unattributed wallet — outflow stays inside R8's 72h window
+    # relative to the wire (wire at day(68)/day(26), buy ~51h later, outflow ~59h later)
     for d in (66.2, 24.8):
         add_crypto(c, day(d, hour=10), rng.uniform(0.38, 0.55), "BTC", outgoing=False, exchange="Kraken")
-        add_crypto(c, day(d - 1.1, hour=18), rng.uniform(0.36, 0.5), "BTC", outgoing=True,
+        add_crypto(c, day(d - 0.5, hour=18), rng.uniform(0.36, 0.5), "BTC", outgoing=True,
                    exchange=None, external_unhosted=True, counterparty=mixer_wallet)
     add_crypto(c, day(9, hour=22), 0.42, "BTC", outgoing=True, exchange=None,
                external_unhosted=True, counterparty=mixer_wallet)
@@ -413,7 +416,8 @@ def evaluate_rules(c: Customer) -> list[dict]:
                     for w_at, w_amt in inbound_wires):
                 fire("R8", t)
 
-        # velocity: trailing 7-day count vs 5x the trailing 90-day daily average
+        # velocity (R9, matching its threshold_logic): >= 10 tx in the trailing 7 days AND
+        # 7-day count > 5x the expected count from the 90-day daily average, max 3 alerts
         if velocity_fires < 3:
             c7 = sum(1 for x in txs[: i + 1] if t["at"] - x["at"] <= timedelta(days=7))
             c90 = sum(1 for x in txs[: i + 1] if t["at"] - x["at"] <= timedelta(days=90))

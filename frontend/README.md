@@ -1,6 +1,6 @@
 # Customer Activity Analytics — frontend
 
-React 18-style SPA (React 19 + TypeScript strict + Vite) for the customer care
+React 19 + TypeScript (strict) + Vite SPA for the customer care
 console: customer search, activity dashboard (overview cards, SVG activity
 chart, transactions, triggered risk rules) and AI risk analyses.
 

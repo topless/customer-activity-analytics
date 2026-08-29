@@ -94,7 +94,7 @@ public class PromptBuilder {
             sb.append('\n');
         }
 
-        sb.append("# Notable transactions (highest risk contribution first, then largest)\n");
+        sb.append("# Notable transactions (selected by risk contribution and size, listed chronologically)\n");
         for (var t : digest.notableTransactions()) {
             sb.append("- [").append(t.id()).append("] ")
                 .append(DATE_TIME.format(t.at())).append(" | ")

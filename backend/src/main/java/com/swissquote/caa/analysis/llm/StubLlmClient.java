@@ -163,6 +163,12 @@ public class StubLlmClient implements LlmClient {
         if (ruleNames.stream().anyMatch(n -> n.contains("unhosted") || n.contains("mixer"))) {
             recs.add("Request proof of ownership for the destination wallet(s) and travel-rule counterparty information.");
         }
+        // SAN-402: any sanctions-related signal escalates immediately, regardless of score
+        if (ruleNames.stream().anyMatch(n -> n.contains("high-risk jurisdiction"))
+            && !"CRITICAL".equals(band.level())) {
+            recs.add(0, "Escalate the attempted transfer to a high-risk jurisdiction to the sanctions desk "
+                + "immediately (Level 3), independent of the overall score.");
+        }
         return recs;
     }
 

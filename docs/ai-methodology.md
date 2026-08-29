@@ -40,7 +40,7 @@ single supervised session, with one subagent used for parallelism.
 4. **Backend built by the main agent; frontend delegated to a subagent** working only in
    `frontend/` against the frozen API contract — the contract-as-interface is what made
    parallel agent work safe.
-5. **Tests as the feedback loop.** 18 unit tests (stub analyst bands, embedding
+5. **Tests as the feedback loop.** 21 unit tests (stub analyst bands, embedding
    determinism, prompt pseudonymisation, failure paths, citation validation, auth) plus a
    Testcontainers integration test walking the full operator journey.
 6. **Adversarial review pass.** After the app worked end-to-end, a multi-agent review

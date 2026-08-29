@@ -11,30 +11,47 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 import com.swissquote.caa.common.NotFoundException;
+import com.swissquote.caa.common.TooManyLoginAttemptsException;
 import com.swissquote.caa.config.AppProperties;
 
 @Service
 public class AuthService {
 
+    /**
+     * Hash of a random throwaway password, matched against when the username is unknown so
+     * both failure paths cost one BCrypt comparison (no username-existence timing oracle).
+     */
+    private static final String DUMMY_HASH =
+        "$2a$10$eaCDN5ezMhHPU5Lj/DJ3eeoC/2IQvAnTC9EveuPA2q.A2GDwP/9da";
+
     private final OperatorRepository operators;
     private final PasswordEncoder passwordEncoder;
     private final JwtEncoder jwtEncoder;
     private final AppProperties properties;
+    private final LoginAttemptService loginAttempts;
 
     public AuthService(OperatorRepository operators, PasswordEncoder passwordEncoder,
-                       JwtEncoder jwtEncoder, AppProperties properties) {
+                       JwtEncoder jwtEncoder, AppProperties properties,
+                       LoginAttemptService loginAttempts) {
         this.operators = operators;
         this.passwordEncoder = passwordEncoder;
         this.jwtEncoder = jwtEncoder;
         this.properties = properties;
+        this.loginAttempts = loginAttempts;
     }
 
     public LoginResponse login(String username, String password) {
-        Operator operator = operators.findByUsername(username)
-            .orElseThrow(() -> new BadCredentialsException("Unknown username"));
-        if (!passwordEncoder.matches(password, operator.getPasswordHash())) {
-            throw new BadCredentialsException("Wrong password");
+        if (loginAttempts.isBlocked(username)) {
+            throw new TooManyLoginAttemptsException("Login blocked for " + username);
         }
+        Operator operator = operators.findByUsername(username).orElse(null);
+        String hash = operator == null ? DUMMY_HASH : operator.getPasswordHash();
+        boolean matches = passwordEncoder.matches(password, hash);
+        if (operator == null || !matches) {
+            loginAttempts.recordFailure(username);
+            throw new BadCredentialsException("Invalid credentials");
+        }
+        loginAttempts.recordSuccess(username);
 
         Instant expiresAt = Instant.now().plus(properties.jwt().ttl());
         JwtClaimsSet claims = JwtClaimsSet.builder()

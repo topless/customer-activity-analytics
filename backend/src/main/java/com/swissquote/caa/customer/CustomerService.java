@@ -37,7 +37,7 @@ public class CustomerService {
     public PageDto<CustomerSummaryDto> search(String query, int page, int size) {
         String q = query == null ? "" : query.trim();
         UUID asUuid = tryParseUuid(q);
-        Page<Customer> result = customers.search(q, asUuid, PageRequest.of(page, size));
+        Page<Customer> result = customers.search(escapeLike(q), asUuid, PageRequest.of(page, size));
 
         List<UUID> ids = result.getContent().stream().map(Customer::getId).toList();
         Map<UUID, TxStats> txStats = stats.transactionStats(ids);
@@ -94,6 +94,11 @@ public class CustomerService {
                 counts.getOrDefault("CRYPTO", 0L)));
         }
         return months;
+    }
+
+    /** LIKE wildcards in user input must match literally, not act as wildcards. */
+    static String escapeLike(String value) {
+        return value.replace("!", "!!").replace("%", "!%").replace("_", "!_");
     }
 
     private static UUID tryParseUuid(String value) {

@@ -147,15 +147,25 @@ export function AnalysisPanel({ customerId }: { customerId: string }) {
   const [runStartedAt, setRunStartedAt] = useState(0)
   const [runError, setRunError] = useState<string | null>(null)
   const autoLoadedRef = useRef(false)
+  // Monotonic request id: rapid history clicks may resolve out of order, and only the
+  // latest request may write state.
+  const detailRequestRef = useRef(0)
 
   const loadDetail = useCallback((analysisId: string) => {
+    const requestId = ++detailRequestRef.current
     setDetailLoading(true)
     setDetailError(null)
     api
       .getAnalysis(analysisId)
-      .then((detail) => setSelected(detail))
-      .catch((cause: unknown) => setDetailError(errorMessage(cause)))
-      .finally(() => setDetailLoading(false))
+      .then((detail) => {
+        if (detailRequestRef.current === requestId) setSelected(detail)
+      })
+      .catch((cause: unknown) => {
+        if (detailRequestRef.current === requestId) setDetailError(errorMessage(cause))
+      })
+      .finally(() => {
+        if (detailRequestRef.current === requestId) setDetailLoading(false)
+      })
   }, [])
 
   // Load the analysis history; auto-open the latest one on first load.

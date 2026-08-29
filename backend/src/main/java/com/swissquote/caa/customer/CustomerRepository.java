@@ -9,10 +9,11 @@ import org.springframework.data.repository.query.Param;
 
 public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
+    /** {@code query} must be pre-escaped with '!' for LIKE wildcards (see CustomerService). */
     @Query("""
         select c from Customer c
-        where upper(c.customerNumber) like upper(concat(:query, '%'))
-           or upper(c.fullName) like upper(concat('%', :query, '%'))
+        where upper(c.customerNumber) like upper(concat(:query, '%')) escape '!'
+           or upper(c.fullName) like upper(concat('%', :query, '%')) escape '!'
            or (:id is not null and c.id = :id)
         order by c.customerNumber
         """)

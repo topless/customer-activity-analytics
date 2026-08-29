@@ -53,6 +53,10 @@ public class DigestBuilder {
             }
         }
 
+        // Selection: risk contribution first, raw amount as tie-break. The amount compare
+        // is cross-currency (a coin quantity ranks below a fiat amount) — acceptable here
+        // because rule-scored transactions dominate the selection and crypto rules score
+        // the transfers that matter; a production version would rank on a booked fiat value.
         List<NotableTransaction> notable = all.stream()
             .sorted(Comparator
                 .comparing((Transaction t) -> scoreByTx.getOrDefault(t.getId(), BigDecimal.ZERO))

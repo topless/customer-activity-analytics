@@ -135,8 +135,8 @@ configuration.
 
 ```
 backend/    Spring Boot 3.5 API (Java 17, Maven wrapper)
-frontend/   React 18 + TypeScript + Vite SPA
-docs/       api-contract.md · architecture.md · ai-methodology.md · screenshots/
+frontend/   React 19 + TypeScript + Vite SPA
+docs/       api-contract.md · architecture.md · ai-methodology.md · demo-script.md · screenshots/
 scripts/    generate_seed_data.py (deterministic demo dataset)
 CLAUDE.md   standing agent instructions (part of the AI-methodology deliverable)
 ```
