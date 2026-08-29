@@ -11,6 +11,8 @@ agents (see [docs/ai-methodology.md](docs/ai-methodology.md)).
 
 ![Dashboard](docs/screenshots/dashboard.png)
 
+![AI analysis](docs/screenshots/ai-analysis.png)
+
 ## Quick start (Docker)
 
 Prerequisite: Docker with Compose.
