@@ -1,0 +1,46 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: caa-db
+    environment:
+      POSTGRES_DB: caa
+      POSTGRES_USER: caa
+      POSTGRES_PASSWORD: caa
+    ports:
+      # host 5433 to avoid clashing with a locally installed PostgreSQL
+      - "5433:5432"
+    volumes:
+      - caa-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U caa -d caa"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  backend:
+    build: ./backend
+    container_name: caa-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/caa
+      SPRING_DATASOURCE_USERNAME: caa
+      SPRING_DATASOURCE_PASSWORD: caa
+      # stub analyst by default; set ANTHROPIC_API_KEY to use the real model
+      CAA_LLM_PROVIDER: ${CAA_LLM_PROVIDER:-auto}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      CAA_JWT_SECRET: ${CAA_JWT_SECRET:-dev-only-caa-jwt-signing-secret-change-me}
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: caa-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  caa-db-data:

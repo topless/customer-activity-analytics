@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: customer-activity-analytics
+  datasource:
+    # default matches `docker compose up -d db` (host port 5433)
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/caa}
+    username: ${SPRING_DATASOURCE_USERNAME:caa}
+    password: ${SPRING_DATASOURCE_PASSWORD:caa}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+  jackson:
+    default-property-inclusion: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+caa:
+  jwt:
+    # Demo signing secret; override with CAA_JWT_SECRET in any real deployment.
+    secret: ${CAA_JWT_SECRET:dev-only-caa-jwt-signing-secret-change-me}
+    ttl: PT8H
+  llm:
+    # auto = anthropic when an API key is configured, stub otherwise. Also: stub | anthropic.
+    provider: ${CAA_LLM_PROVIDER:auto}
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:}
+      base-url: https://api.anthropic.com
+      model: ${CAA_ANTHROPIC_MODEL:claude-sonnet-5}
+      max-tokens: 2048
+  rag:
+    top-k: 6
+    embedding-dim: 384
+  analysis:
+    # Cap on the number of individual transactions rendered into the prompt.
+    max-prompt-transactions: 40
