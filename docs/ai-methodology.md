@@ -21,8 +21,9 @@ audit.
 
 ## 2. How the application was generated
 
-Built with **Claude Code** (Anthropic's agentic CLI) running **Claude Fable 5**, in a
-single supervised session, with one subagent used for parallelism.
+Built with **Claude Code** (Anthropic's agentic CLI) running **Claude Fable 5**, in one
+supervised build session plus a short follow-up verification session, with one subagent
+used for parallelism and a multi-agent review pass before delivery.
 
 ### Method
 
