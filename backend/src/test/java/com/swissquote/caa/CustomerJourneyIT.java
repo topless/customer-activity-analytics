@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
 import com.fasterxml.jackson.databind.JsonNode;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,6 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = "caa.llm.provider=stub")
 @Import(TestcontainersConfiguration.class)
+// the 405 assertion below intentionally triggers Spring's PageNotFound WARN; keep the build log quiet
+@TestPropertySource(properties = "logging.level.org.springframework.web.servlet.PageNotFound=ERROR")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CustomerJourneyIT {
 

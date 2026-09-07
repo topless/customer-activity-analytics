@@ -16,6 +16,7 @@
 
 	<properties>
 		<java.version>17</java.version>
+		<test.jvm.args>-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar -Xshare:off</test.jvm.args>
 	</properties>
 
 	<dependencies>
@@ -90,10 +91,26 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<!-- Test JVM flags (unit + integration):
+			     -javaagent loads Mockito's inline mock maker explicitly instead of letting it
+			       self-attach (dynamic agent loading warns on JDK 21+ and is slated to be
+			       disallowed by default, JEP 451);
+			     -Xshare:off silences the JDK's CDS notice caused by that agent appending to the
+			       bootstrap classpath — CDS only shaves JVM startup, irrelevant for a test fork. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>${test.jvm.args}</argLine>
+				</configuration>
+			</plugin>
 			<!-- *IT tests (Testcontainers, need Docker) run in `verify`; `test` stays unit-only -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<argLine>${test.jvm.args}</argLine>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
