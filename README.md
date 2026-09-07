@@ -140,3 +140,7 @@ docs/       api-contract.md · architecture.md · ai-methodology.md · demo-scri
 scripts/    generate_seed_data.py (deterministic demo dataset)
 CLAUDE.md   standing agent instructions (part of the AI-methodology deliverable)
 ```
+
+`caa` = **C**ustomer **A**ctivity **A**nalytics — the short name used for the Java package root
+(`com.swissquote.caa`), the `caa.*` configuration prefix and `CAA_*` environment variables,
+the PostgreSQL database and role, and the `caa-*` container names.
