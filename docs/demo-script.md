@@ -1,6 +1,7 @@
 # Demo script (10–15 minutes)
 
-A suggested walkthrough for presenting the application.
+A suggested walkthrough for presenting the application. The recorded, captioned demo
+(`scripts/demo-recording`) follows this script step by step.
 
 ## 0. Setup (before the demo)
 

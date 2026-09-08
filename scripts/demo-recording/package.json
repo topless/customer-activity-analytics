@@ -1,0 +1,15 @@
+{
+  "name": "caa-demo-recording",
+  "version": "1.0.0",
+  "description": "Scripted, captioned demo recording of the Customer Activity Analytics app",
+  "scripts": {
+    "record": "node record.js",
+    "encode": "node encode.js",
+    "demo": "node record.js && node encode.js"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "^5.3.0",
+    "playwright": "^1.63.0"
+  },
+  "private": true
+}

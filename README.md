@@ -144,3 +144,10 @@ CLAUDE.md   standing agent instructions (part of the AI-methodology deliverable)
 `caa` = **C**ustomer **A**ctivity **A**nalytics — the short name used for the Java package root
 (`com.swissquote.caa`), the `caa.*` configuration prefix and `CAA_*` environment variables,
 the PostgreSQL database and role, and the `caa-*` container names.
+
+**Recorded demo.** A captioned ~10-minute walkthrough (login, search, dashboard,
+transactions, AI analyses, second operator, history, plus architecture and methodology
+slides) accompanies the submission as an MP4 with an `.srt` subtitle track. It is generated
+from the running application by `scripts/demo-recording` (Playwright script + rendered
+slides), so it can be re-recorded at any time; see `docs/demo-script.md` for the narrative
+it follows.
