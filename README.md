@@ -9,6 +9,10 @@ Built for the Swissquote platform-engineering assignment with **Java 17 + Spring
 Hibernate/JPA + PostgreSQL (pgvector) + React/TypeScript** — generated end-to-end with AI
 agents (see [docs/ai-methodology.md](docs/ai-methodology.md)).
 
+[![Watch the demo (13 min, narrated and captioned)](docs/demo/poster.png)](docs/demo/customer-activity-analytics-demo.mp4)
+
+<sub>▶ Click the poster to play the 13-minute walkthrough in GitHub's video player · subtitles: [`.srt`](docs/demo/customer-activity-analytics-demo.srt) · re-recordable with [`scripts/demo-recording`](scripts/demo-recording/README.md)</sub>
+
 ![Dashboard](docs/screenshots/dashboard.png)
 
 ![AI analysis](docs/screenshots/ai-analysis.png)
@@ -136,7 +140,7 @@ configuration.
 ```
 backend/    Spring Boot 3.5 API (Java 17, Maven wrapper)
 frontend/   React 19 + TypeScript + Vite SPA
-docs/       api-contract.md · architecture.md · ai-methodology.md · demo-script.md · screenshots/
+docs/       api-contract.md · architecture.md · ai-methodology.md · demo-script.md · demo/ (video) · screenshots/
 scripts/    generate_seed_data.py (deterministic demo dataset)
 CLAUDE.md   standing agent instructions (part of the AI-methodology deliverable)
 ```
@@ -145,9 +149,10 @@ CLAUDE.md   standing agent instructions (part of the AI-methodology deliverable)
 (`com.swissquote.caa`), the `caa.*` configuration prefix and `CAA_*` environment variables,
 the PostgreSQL database and role, and the `caa-*` container names.
 
-**Recorded demo.** A narrated, captioned ~12-minute walkthrough (login, search, dashboard,
-transactions, AI analyses, second operator, history, plus architecture and methodology
-slides) accompanies the submission as an MP4 with an `.srt` subtitle track. It is generated
-from the running application by `scripts/demo-recording` (Playwright script, rendered
-slides, local Kokoro text-to-speech), so it can be re-recorded at any time; see
-`docs/demo-script.md` for the narrative it follows.
+**Recorded demo.** [`docs/demo/customer-activity-analytics-demo.mp4`](docs/demo/customer-activity-analytics-demo.mp4)
+is a narrated, captioned 13-minute walkthrough (login, search, dashboard, transactions, AI
+analyses, second operator, history, plus architecture and methodology slides) with an
+[`.srt`](docs/demo/customer-activity-analytics-demo.srt) subtitle track. It is generated from
+the running application by `scripts/demo-recording` (Playwright script, rendered slides,
+local Kokoro text-to-speech), so it can be re-recorded at any time; `docs/demo-script.md` is
+the narrative it follows.
