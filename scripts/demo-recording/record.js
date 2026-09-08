@@ -18,6 +18,25 @@ const W = 1440;
 const H = 900;
 const SPEED = Number(process.env.SPEED || 1); // >1 = faster (for dry runs)
 
+// NARRATE=1: hold captions/slides at least as long as their synthesized narration clip
+const NARRATE = process.env.NARRATE === '1';
+const narration = NARRATE ? loadNarration() : null;
+
+function loadNarration() {
+  const dir = path.join(OUT, 'narration');
+  const lines = JSON.parse(fs.readFileSync(path.join(dir, 'lines.json'), 'utf8'));
+  const durations = JSON.parse(fs.readFileSync(path.join(dir, 'durations.json'), 'utf8'));
+  const byCaption = new Map();
+  const bySlide = new Map();
+  for (const line of lines) {
+    const seconds = durations[line.id];
+    if (seconds === undefined) continue;
+    if (line.slide) bySlide.set(line.slide, { id: line.id, seconds });
+    else byCaption.set(line.caption, { id: line.id, seconds });
+  }
+  return { byCaption, bySlide };
+}
+
 const LUKAS = 'CUST-10004';
 const ELENA = 'CUST-10005';
 const ANNA = 'CUST-10001';
@@ -90,10 +109,12 @@ const now = () => (Date.now() - t0) / 1000;
 async function caption(text, { kicker, hold } = {}) {
   const start = now();
   if (timeline.length) timeline[timeline.length - 1].end = start - 0.1;
-  timeline.push({ start, text, end: null });
+  const clip = narration ? narration.byCaption.get(text) : undefined;
+  timeline.push({ start, text, end: null, id: clip ? clip.id : undefined });
   console.log(`[${start.toFixed(1).padStart(6)}s] ${kicker ? kicker + ' — ' : ''}${text.slice(0, 90)}`);
   await page.evaluate(([t, k]) => window.__caption(t, k), [text, kicker || null]);
-  const ms = hold ?? Math.max(4600, 2900 + text.length * 76);
+  let ms = hold ?? Math.max(4600, 2900 + text.length * 76);
+  if (clip) ms = Math.max(ms, (clip.seconds + 0.9) * 1000);
   await sleep(ms);
 }
 
@@ -158,8 +179,9 @@ async function scrollToTop() {
 async function showSlide(name, hold) {
   await page.setContent(slides[name]());
   await page.evaluate(() => window.__cursorHome && window.__cursorHome());
-  timeline.push({ start: now(), text: `[slide: ${name}]`, end: null, slide: true });
-  await sleep(hold);
+  const clip = narration ? narration.bySlide.get(name) : undefined;
+  timeline.push({ start: now(), text: `[slide: ${name}]`, end: null, slide: true, id: clip ? clip.id : undefined });
+  await sleep(clip ? Math.max(hold, (clip.seconds + 1.5) * 1000) : hold);
   timeline[timeline.length - 1].end = now();
 }
 

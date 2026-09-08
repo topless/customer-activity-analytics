@@ -73,7 +73,7 @@ const slides = {
     <h1>Customer Activity Analytics</h1>
     <p class="lead">A customer-care console for reviewing card, payment and crypto activity —
       with a persisted, policy-grounded AI risk analysis.</p>
-    <p class="lead" style="margin-top:34px">Christos Topaloudis · recorded walkthrough, ~12 minutes, captioned (no audio)</p>
+    <p class="lead" style="margin-top:34px">Christos Topaloudis · narrated walkthrough, ~13 minutes, captions included</p>
     ${footer('Spring Boot 3.5 · React 19 · PostgreSQL + pgvector')}`, true),
 
   agenda: () => wrap(`
