@@ -17,8 +17,17 @@ if (!fs.existsSync(input)) {
   process.exit(1);
 }
 
+// end 2.5 s after the last timeline entry: Playwright keeps recording the frozen final frame
+// until the context closes, which would otherwise leave a long static tail
+const timelinePath = path.join(OUT, 'timeline.json');
+const cut = fs.existsSync(timelinePath)
+  ? JSON.parse(fs.readFileSync(timelinePath, 'utf8')).reduce((m, e) => Math.max(m, e.end || e.start || 0), 0) + 2.5
+  : null;
+// TRIM_START=<seconds> drops leading frames recorded before the timeline clock started
+const trimStart = Number(process.env.TRIM_START || 0);
 execFileSync(ffmpeg, [
-  '-y', '-i', input,
+  '-y', ...(trimStart > 0 ? ['-ss', trimStart.toFixed(2)] : []), '-i', input,
+  ...(cut ? ['-t', cut.toFixed(2)] : []),
   '-c:v', 'libx264', '-preset', 'slow', '-crf', '21', '-pix_fmt', 'yuv420p',
   '-r', '25', '-movflags', '+faststart', '-an',
   output,

@@ -11,7 +11,7 @@ public record AppProperties(Jwt jwt, Llm llm, Rag rag, Analysis analysis) {
 
     public record Llm(String provider, Anthropic anthropic) {
 
-        public record Anthropic(String apiKey, String baseUrl, String model, int maxTokens) {
+        public record Anthropic(String apiKey, String baseUrl, String model, int maxTokens, boolean thinking) {
         }
     }
 

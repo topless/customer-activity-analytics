@@ -6,7 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { SLIDES, spoken } = require('./narration');
+const { SLIDES, DYNAMIC, spoken } = require('./narration');
 
 const OUT = path.join(__dirname, 'out', 'narration');
 fs.mkdirSync(OUT, { recursive: true });
@@ -24,6 +24,9 @@ captions.forEach((text) => {
 });
 for (const [name, text] of Object.entries(SLIDES)) {
   lines.push({ id: `slide-${name}`, slide: name, text });
+}
+for (const [id, text] of Object.entries(DYNAMIC)) {
+  lines.push({ id, dynamic: true, text });
 }
 
 fs.writeFileSync(path.join(OUT, 'lines.json'), JSON.stringify(lines, null, 1));

@@ -1,152 +1,164 @@
 1
-00:00:00,277 --> 00:00:20,704
+00:00:00,275 --> 00:00:20,701
 Customer Activity Analytics — a customer-care console for reviewing card, payment and crypto activity, with a persisted, policy-grounded A-I risk analysis. This is a recorded walkthrough of the Swissquote platform-engineering assignment, by Christos Topaloudis.
 
 2
-00:00:20,973 --> 00:00:54,249
+00:00:20,965 --> 00:00:54,241
 The demo follows the five specification points in order: operator login; searching a customer and reviewing card, payment and crypto activity from the relational database; the activity overview and the A-I-powered analysis with a risk level, findings and recommendations; retrieval-augmented generation over internal policy documents; and persisted analyses that can be reviewed later. After that: the architecture, the A-I pipeline, and how the application was built with A-I agents.
 
 3
-00:00:54,511 --> 00:01:59,705
+00:00:54,515 --> 00:01:59,720
 The architecture is three containers bound by one contract. In the browser, a React nineteen and TypeScript single-page application served by engine-x. Behind it, a Spring Boot three-point-five A-P-I on Java seventeen, organised in four packages: auth, with B-crypt operators and self-issued J-W-Ts; customer and transaction, whose J-P-A entities mirror the schema from the assignment; rag, which turns policy documents into embedded chunks in P-G-vector; and analysis, which runs the digest, retrieval, prompt, L-L-M port, validation and persistence. Postgres sixteen with the P-G-vector extension holds everything, migrated by Flyway. The L-L-M port has two adapters: a deterministic stub, which is the default and runs offline, and an Anthropic adapter that activates with an A-P-I key. The A-P-I contract in the docs folder is the source of truth for both sides.
 
 4
-00:02:00,055 --> 00:02:16,449
+00:02:00,070 --> 00:02:16,462
 Operators sign in with their own credentials. Passwords are BCrypt-hashed in the operators table; a successful login returns a stateless HS256 JWT that every other endpoint requires.
 
 5
-00:02:16,799 --> 00:02:24,922
+00:02:16,812 --> 00:02:24,946
 For the demo the credentials are one click away.
 
 6
-00:02:25,272 --> 00:02:40,821
+00:02:25,296 --> 00:02:40,844
 Signed in as Alice, an operator. The landing page lists the customer base with a live risk score per customer, summed from the rule-based risk assessments in the database.
 
 7
-00:02:41,171 --> 00:02:52,305
+00:02:41,194 --> 00:02:52,328
 Search works by customer number, name, or the raw customer UUID — as a prefix or a name fragment.
 
 8
-00:02:52,655 --> 00:03:04,249
+00:02:52,678 --> 00:03:04,261
 “weber” narrows the list to Lukas Weber; the results are server-side paged.
 
 9
-00:03:04,599 --> 00:03:10,162
+00:03:04,611 --> 00:03:10,185
 A customer number works the same way.
 
 10
-00:03:10,512 --> 00:03:27,867
+00:03:10,535 --> 00:03:27,894
 Back to the full list. Risk badges: green is routine, amber and orange need attention, red means high risk — Lukas Weber, at 565, is where we go next.
 
 11
-00:03:28,217 --> 00:03:38,219
+00:03:28,244 --> 00:03:38,246
 The customer dashboard. Profile facts and KYC level on the left; the risk score hero on the right.
 
 12
-00:03:38,569 --> 00:03:55,112
+00:03:38,596 --> 00:03:55,137
 Overview cards break the six-month window down per activity type: counts, failures, and volumes per currency — nothing is converted between currencies.
 
 13
-00:03:55,462 --> 00:04:11,676
+00:03:55,487 --> 00:04:11,681
 Monthly activity mix — card, payment and crypto counts. The chart is hand-rolled SVG; hovering a month shows its figures.
 
 14
-00:04:12,026 --> 00:04:33,992
+00:04:12,031 --> 00:04:34,001
 Triggered risk rules — the deterministic rule layer from the risk_rules and risk_assessments tables: structuring, transfers to an unhosted wallet, high-value cross-border payments, a payment to a FATF-listed jurisdiction.
 
 15
-00:04:34,342 --> 00:04:49,285
+00:04:34,351 --> 00:04:49,237
 All activity in one table, newest first, with the rule annotations per transaction. Filters go to the API; the page is server-side paged.
 
 16
-00:04:49,635 --> 00:05:00,155
+00:04:49,587 --> 00:05:00,099
 Payments only. Expanding a row shows the payment-specific details from the payment_activity table.
 
 17
-00:05:00,505 --> 00:05:17,707
+00:05:00,449 --> 00:05:17,647
 A 27’300 CHF SWIFT transfer to the UAE: accounts, method, receiver bank country, and the rules it triggered — a high-value cross-border payment.
 
 18
-00:05:18,057 --> 00:05:36,391
+00:05:17,997 --> 00:05:36,278
 Filtering by status FAILED surfaces the blocked 25’000 CHF attempt to a high-risk jurisdiction — the single highest-weighted signal in the catalogue.
 
 19
-00:05:36,741 --> 00:05:55,885
+00:05:36,628 --> 00:05:55,768
 Crypto activity carries chain, wallets and transaction hash. This BTC transfer goes to a wallet with no exchange attribution — an unhosted counterparty, reused across several transfers.
 
 20
-00:05:56,235 --> 00:06:04,163
+00:05:56,118 --> 00:06:05,193
 Now the AI analysis. Nothing has been run for this customer yet, so the history is empty.
 
 21
-00:06:04,513 --> 00:06:24,496
-Clicking “Run AI analysis” builds a pseudonymised activity digest, retrieves the relevant policy chunks from pgvector, prompts the model through the LLM port, validates the JSON and persists the result.
+00:06:05,543 --> 00:06:27,706
+Clicking “Run AI analysis” builds a pseudonymised activity digest, retrieves the relevant policy chunks from pgvector, prompts the model through the LLM port, validates the JSON and persists the result. With a real model this takes a few seconds.
 
 22
-00:06:24,846 --> 00:06:36,445
+00:06:28,056 --> 00:06:39,653
 CRITICAL. The banner carries the level, timestamp, transaction count, the model that produced it, and who requested it.
 
 23
-00:06:36,795 --> 00:06:54,673
+00:06:40,003 --> 00:06:57,879
 The summary is a short narrative for the operator; findings are quantified and each links to the concrete transactions behind it.
 
 24
-00:06:55,023 --> 00:07:09,068
-Recommendations follow the escalation policy: 24-hour AML escalation, restrictions pending review, a case file for a possible MROS report.
+00:06:58,229 --> 00:07:12,281
+Recommendations are concrete next steps — escalation, restrictions, documentation — grounded in the escalation policy the model was given.
 
 25
-00:07:09,418 --> 00:07:30,554
+00:07:12,631 --> 00:07:33,789
 And the RAG grounding: the policy excerpts the analysis cites, retrieved from the vector store for this case. Citations are accepted only if the chunk was actually retrieved.
 
 26
-00:07:30,904 --> 00:07:51,174
+00:07:34,139 --> 00:07:54,398
 Two more customers to show the analysis differentiates. Elena has gambling-heavy card use and a burst of declines.
 
 27
-00:07:51,524 --> 00:08:09,184
-HIGH — driven by the high-risk merchant category and repeated declines, with matching recommendations: affordability checks, a card-limit conversation.
+00:07:54,748 --> 00:08:10,654
+HIGH — the model weighs the gambling-heavy card use and the burst of declines, and its recommendations follow from that profile.
 
 28
-00:08:09,534 --> 00:08:24,371
-Anna is a routine retail customer.
-
-29
-00:08:24,721 --> 00:08:36,758
-LOW — one minor card-not-present signal; no action beyond routine monitoring.
-
-30
-00:08:37,108 --> 00:08:50,941
+00:08:11,004 --> 00:08:24,842
 Analyses are persisted and reviewable later. Let’s sign out and come back as a different operator.
 
-31
-00:08:51,291 --> 00:09:06,024
+29
+00:08:25,192 --> 00:08:39,911
 Bob is a supervisor — the role shows in the header.
 
-32
-00:09:06,374 --> 00:09:20,806
+30
+00:08:40,261 --> 00:08:54,689
 Lukas Weber again. The panel opens on the latest analysis — Alice’s run from a few minutes ago — and the history lists every run.
 
-33
-00:09:21,156 --> 00:09:36,119
+31
+00:08:55,039 --> 00:09:09,968
 Bob’s own run is now on top. Each entry records who requested it, when, the model and the outcome; failed runs are stored and shown too.
 
-34
-00:09:36,469 --> 00:09:49,766
+32
+00:09:10,318 --> 00:09:23,613
 Selecting an older entry reloads that analysis exactly as it was produced — the prompt and raw model output are kept alongside it for audit.
 
+33
+00:09:25,738 --> 00:10:00,461
+The stub is the offline default. Setting an Anthropic A-P-I key and restarting the backend switches the very same pipeline to Claude: no code change, the configuration picks the Anthropic adapter, and the digest, retrieval, prompt, JSON contract, validation and persistence are all unchanged. The backend is restarting with the key now; then Bob re-runs the analysis on Lukas Weber.
+
+34
+00:10:00,811 --> 00:10:15,905
+This request goes to Claude: the model reasons over the pseudonymised digest and the retrieved policy excerpts and returns the same JSON structure the stub produces.
+
 35
-00:09:50,631 --> 00:10:55,494
-Here is what happens when an operator clicks Run A-I analysis. First, an activity digest: counts, volumes, the triggered rules and the most relevant transactions — pseudonymised, so the model sees the customer number, never a name, e-mail or date of birth. Second, retrieval: a query built from the rule signals is embedded and matched against the policy chunks in P-G-vector, and the top six excerpts are attached. Third, the prompt: a system prompt with a strict JSON schema and grounding rules, and a user prompt carrying the digest and the excerpts. Fourth, the L-L-M port — stub or Claude, same JSON contract. Fifth, validation and persistence: the risk level is checked against the enum, citations are accepted only if the chunk was actually retrieved, failed runs are stored as failed, and the prompt and raw output are kept for audit. Five policy documents are ingested at startup, giving twenty-six chunks.
+00:10:16,255 --> 00:10:40,217
+The model is still working — the interface simply shows the elapsed time. Real-model latency is part of the honest picture: a few seconds per analysis, persisted once, reviewable forever.
 
 36
-00:10:55,756 --> 00:12:05,247
-How it was built: direct, constrain, verify. The specification came first — the schema and the A-P-I contract were designed and committed before any code. Standing rules for the agent live in the CLAUDE dot M-D file: the contract is the source of truth, no real personal data anywhere, the application must run offline, secrets only through the environment. Deterministic data came next: a generator with eight behaviour archetypes re-implements the ten risk rules, so the seeded signals are consistent with the catalogue. The backend was built by the main agent and the frontend by a parallel sub-agent working only against the frozen contract. Twenty-one unit tests and a Testcontainers journey test gave fast feedback. Finally, an adversarial review: six reviewer agents, every finding independently double-checked, fourteen confirmed defects, all fixed before delivery. It was built with Claude Code, and the full account is in the A-I methodology document.
+00:10:40,567 --> 00:11:05,094
+CRITICAL — produced by claude-sonnet-5, in the same banner, with its own findings, recommendations and policy citations, validated the same way.
 
 37
-00:12:05,509 --> 00:12:38,635
-To run it yourself: docker compose up, dash dash build, starts the frontend, the A-P-I and the database — no A-P-I keys required. M-V-N-W verify runs the twenty-one unit tests and the Testcontainers integration test. Set an Anthropic A-P-I key to switch the analysis to Claude. The two demo operators are alice and bob; the eight customers are fictional, and all data is generated. The README covers architecture, design decisions and assumptions.
+00:11:05,444 --> 00:11:16,839
+The history now lists both: the deterministic stub runs and the Claude run, each recording which model produced it.
 
 38
-00:12:38,898 --> 00:12:49,879
+00:11:17,700 --> 00:12:22,560
+Here is what happens when an operator clicks Run A-I analysis. First, an activity digest: counts, volumes, the triggered rules and the most relevant transactions — pseudonymised, so the model sees the customer number, never a name, e-mail or date of birth. Second, retrieval: a query built from the rule signals is embedded and matched against the policy chunks in P-G-vector, and the top six excerpts are attached. Third, the prompt: a system prompt with a strict JSON schema and grounding rules, and a user prompt carrying the digest and the excerpts. Fourth, the L-L-M port — stub or Claude, same JSON contract. Fifth, validation and persistence: the risk level is checked against the enum, citations are accepted only if the chunk was actually retrieved, failed runs are stored as failed, and the prompt and raw output are kept for audit. Five policy documents are ingested at startup, giving twenty-six chunks.
+
+39
+00:12:22,823 --> 00:13:32,308
+How it was built: direct, constrain, verify. The specification came first — the schema and the A-P-I contract were designed and committed before any code. Standing rules for the agent live in the CLAUDE dot M-D file: the contract is the source of truth, no real personal data anywhere, the application must run offline, secrets only through the environment. Deterministic data came next: a generator with eight behaviour archetypes re-implements the ten risk rules, so the seeded signals are consistent with the catalogue. The backend was built by the main agent and the frontend by a parallel sub-agent working only against the frozen contract. Twenty-one unit tests and a Testcontainers journey test gave fast feedback. Finally, an adversarial review: six reviewer agents, every finding independently double-checked, fourteen confirmed defects, all fixed before delivery. It was built with Claude Code, and the full account is in the A-I methodology document.
+
+40
+00:13:32,567 --> 00:14:05,693
+To run it yourself: docker compose up, dash dash build, starts the frontend, the A-P-I and the database — no A-P-I keys required. M-V-N-W verify runs the twenty-one unit tests and the Testcontainers integration test. Set an Anthropic A-P-I key to switch the analysis to Claude. The two demo operators are alice and bob; the eight customers are fictional, and all data is generated. The README covers architecture, design decisions and assumptions.
+
+41
+00:14:05,955 --> 00:14:16,933
 Thank you for watching. The repository is on GitHub under topless, slash, customer-activity-analytics. Christos Topaloudis.
 

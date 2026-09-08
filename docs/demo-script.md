@@ -46,6 +46,14 @@ Open **CUST-10004 · Lukas Weber** (risk 565):
   **history panel**: all runs persisted with requester, timestamp, model and outcome
   (spec #5). Mention failed runs are persisted and shown too.
 
+## 4b. Same pipeline, real model (2 min) — live Claude
+
+- Show the one-variable switch: `ANTHROPIC_API_KEY=… docker compose up -d backend`
+  (`LlmClientConfig` picks `AnthropicLlmClient` when a key is configured; nothing else changes).
+- Re-run the analysis on Lukas as Bob: the banner now shows `claude-sonnet-5`, with the model's
+  own findings, recommendations and policy citations; the history lists stub runs and the
+  Claude run side by side. Real-model latency is ~30–40 s — let it show.
+
 ## 5. Under the hood (3 min)
 
 - `docs/api-contract.md` — contract-first development; it's what allowed the frontend to

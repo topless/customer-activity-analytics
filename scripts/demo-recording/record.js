@@ -8,6 +8,7 @@
 // recording is self-explanatory without narration.
 
 const { chromium } = require('playwright');
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { slides } = require('./slides');
@@ -28,18 +29,23 @@ function loadNarration() {
   const durations = JSON.parse(fs.readFileSync(path.join(dir, 'durations.json'), 'utf8'));
   const byCaption = new Map();
   const bySlide = new Map();
+  const byId = new Map();
   for (const line of lines) {
     const seconds = durations[line.id];
     if (seconds === undefined) continue;
+    byId.set(line.id, { id: line.id, seconds });
     if (line.slide) bySlide.set(line.slide, { id: line.id, seconds });
-    else byCaption.set(line.caption, { id: line.id, seconds });
+    else if (!line.dynamic) byCaption.set(line.caption, { id: line.id, seconds });
   }
-  return { byCaption, bySlide };
+  return { byCaption, bySlide, byId };
 }
+
+// DEMO_LIVE=1: start on the stub, then switch the backend to the Anthropic adapter on camera
+const LIVE = process.env.DEMO_LIVE === '1';
+const REPO = path.resolve(__dirname, '..', '..');
 
 const LUKAS = 'CUST-10004';
 const ELENA = 'CUST-10005';
-const ANNA = 'CUST-10001';
 
 // ---------------------------------------------------------------- overlay
 
@@ -106,10 +112,10 @@ let stepNo = 0;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms / SPEED));
 const now = () => (Date.now() - t0) / 1000;
 
-async function caption(text, { kicker, hold } = {}) {
+async function caption(text, { kicker, hold, key } = {}) {
   const start = now();
   if (timeline.length) timeline[timeline.length - 1].end = start - 0.1;
-  const clip = narration ? narration.byCaption.get(text) : undefined;
+  const clip = narration ? (key ? narration.byId.get(key) : narration.byCaption.get(text)) : undefined;
   timeline.push({ start, text, end: null, id: clip ? clip.id : undefined });
   console.log(`[${start.toFixed(1).padStart(6)}s] ${kicker ? kicker + ' — ' : ''}${text.slice(0, 90)}`);
   await page.evaluate(([t, k]) => window.__caption(t, k), [text, kicker || null]);
@@ -190,6 +196,32 @@ async function gotoApp(pathname = '/') {
   await sleep(600);
 }
 
+/** Recreates the backend with the given provider and restarts nginx (it resolves the backend at startup). */
+function switchProvider(provider) {
+  execSync('docker compose up -d backend', { cwd: REPO, env: { ...process.env, CAA_LLM_PROVIDER: provider }, stdio: 'ignore' });
+}
+
+async function waitForBackend() {
+  const deadline = Date.now() + 120000;
+  while (Date.now() < deadline) {
+    try {
+      const r = await fetch('http://localhost:8080/actuator/health');
+      if (r.ok) break;
+    } catch (_) { /* not up yet */ }
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  execSync('docker compose restart frontend', { cwd: REPO, stdio: 'ignore' });
+  const until = Date.now() + 60000;
+  while (Date.now() < until) {
+    try {
+      const r = await fetch(APP + '/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"username":"x","password":"x"}' });
+      if (r.status === 401) return; // proxied through to the new backend
+    } catch (_) { /* nginx restarting */ }
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  throw new Error('frontend did not come back after provider switch');
+}
+
 function section(title) {
   stepNo += 1;
   return `${String(stepNo).padStart(2, '0')} · ${title}`;
@@ -222,19 +254,32 @@ async function searchAndOpen(query, customerNumber) {
   await sleep(600);
 }
 
-async function runAnalysis() {
+async function startAnalysis() {
   const ai = page.locator('section[aria-label="AI risk analysis"]');
   const before = await ai.locator('.history-row').count();
-  const button = ai.locator('button', { hasText: 'Run AI analysis' });
-  await click(button, { after: 300 });
+  await click(ai.locator('button', { hasText: 'Run AI analysis' }), { after: 300 });
+  return before;
+}
+
+async function waitForAnalysis(before) {
   // a new run is done when it shows up in the history list (a banner may already exist)
   await page.waitForFunction(
     ([sel, n]) => document.querySelectorAll(sel).length > n,
     ['section[aria-label="AI risk analysis"] .history-row', before],
-    { timeout: 120000 },
+    { timeout: 180000 },
   );
-  await page.waitForSelector('.analysis-banner-title', { timeout: 120000 });
+  await page.waitForSelector('.analysis-banner-title', { timeout: 180000 });
   await sleep(900);
+}
+
+async function runAnalysis() {
+  await waitForAnalysis(await startAnalysis());
+}
+
+/** The risk level the model actually returned, read from the banner ("CRITICAL RISK" -> "CRITICAL"). */
+async function currentLevel() {
+  const text = await page.locator('.analysis-banner-title').first().textContent();
+  return (text || '').replace(/\s*RISK\s*$/i, '').trim() || 'The result';
 }
 
 async function walkthrough() {
@@ -328,23 +373,24 @@ async function walkthrough() {
   const ai = page.locator('section[aria-label="AI risk analysis"]');
   await scrollTo(ai, 'start');
   await caption('Now the AI analysis. Nothing has been run for this customer yet, so the history is empty.', { kicker: kAi, hold: 4000 });
-  await caption('Clicking “Run AI analysis” builds a pseudonymised activity digest, retrieves the relevant policy chunks from pgvector, prompts the model through the LLM port, validates the JSON and persists the result.', { kicker: kAi });
-  await runAnalysis();
-  await caption('CRITICAL. The banner carries the level, timestamp, transaction count, the model that produced it, and who requested it.', { kicker: kAi });
+  const pending = await startAnalysis();
+  await caption('Clicking “Run AI analysis” builds a pseudonymised activity digest, retrieves the relevant policy chunks from pgvector, prompts the model through the LLM port, validates the JSON and persists the result. With a real model this takes a few seconds.', { kicker: kAi, key: 'analysis-wait' });
+  await waitForAnalysis(pending);
+  await caption(`${await currentLevel()}. The banner carries the level, timestamp, transaction count, the model that produced it, and who requested it.`, { kicker: kAi, key: 'analysis-banner' });
   await caption('The summary is a short narrative for the operator; findings are quantified and each links to the concrete transactions behind it.', { kicker: kAi });
   const findings = ai.locator('.finding-detail').first();
   await scrollTo(findings, 'center');
   await sleep(3500);
   const recs = ai.locator('.recommendation-list');
   await scrollTo(recs, 'center');
-  await caption('Recommendations follow the escalation policy: 24-hour AML escalation, restrictions pending review, a case file for a possible MROS report.', { kicker: kAi });
+  await caption('Recommendations are concrete next steps — escalation, restrictions, documentation — grounded in the escalation policy the model was given.', { kicker: kAi, key: 'analysis-recommendations' });
   const cited = ai.locator('.policy-excerpt').first();
   await scrollTo(cited, 'center');
   await caption('And the RAG grounding: the policy excerpts the analysis cites, retrieved from the vector store for this case. Citations are accepted only if the chunk was actually retrieved.', { kicker: kAi });
   await scrollTo(ai, 'start');
   await sleep(600);
 
-  // ---- differentiation: Elena, Anna
+  // ---- differentiation: Elena
   const kDiff = section('Different customers, different answers');
   await scrollToTop();
   await click(page.locator('.back-link'), { after: 1200 });
@@ -352,14 +398,7 @@ async function walkthrough() {
   await searchAndOpen(ELENA, ELENA);
   await scrollTo(page.locator('section[aria-label="AI risk analysis"]'), 'start');
   await runAnalysis();
-  await caption('HIGH — driven by the high-risk merchant category and repeated declines, with matching recommendations: affordability checks, a card-limit conversation.', { kicker: kDiff });
-  await scrollToTop();
-  await click(page.locator('.back-link'), { after: 1200 });
-  await caption('Anna is a routine retail customer.', { kicker: kDiff, hold: 4200 });
-  await searchAndOpen(ANNA, ANNA);
-  await scrollTo(page.locator('section[aria-label="AI risk analysis"]'), 'start');
-  await runAnalysis();
-  await caption('LOW — one minor card-not-present signal; no action beyond routine monitoring.', { kicker: kDiff });
+  await caption(`${await currentLevel()} — the model weighs the gambling-heavy card use and the burst of declines, and its recommendations follow from that profile.`, { kicker: kDiff, key: 'analysis-elena' });
 
   // ---- second operator + history
   const kHist = section('Persisted analyses & a second operator');
@@ -386,12 +425,50 @@ async function walkthrough() {
   await caption('Selecting an older entry reloads that analysis exactly as it was produced — the prompt and raw model output are kept alongside it for audit.', { kicker: kHist });
   await clearCaption();
   await sleep(600);
+
+  if (LIVE) await liveModelSegment();
+}
+
+/** Flip the backend to the Anthropic adapter on camera and re-run Lukas with the real model. */
+async function liveModelSegment() {
+  const kLive = section('Live model');
+  const customerPath = await page.evaluate(() => location.pathname);
+  switchProvider('anthropic');
+  await showSlide('live', 8000);
+  await waitForBackend();
+  await gotoApp(customerPath);
+  await page.waitForSelector('section[aria-label="AI risk analysis"]');
+  const ai = page.locator('section[aria-label="AI risk analysis"]');
+  await scrollTo(ai, 'start');
+  const pending = await startAnalysis();
+  await caption('This request goes to Claude: the model reasons over the pseudonymised digest and the retrieved policy excerpts and returns the same JSON structure the stub produces.', { kicker: kLive, key: 'live-wait' });
+  const doneAlready = await page.evaluate(([sel, n]) => document.querySelectorAll(sel).length > n, ['section[aria-label="AI risk analysis"] .history-row', pending]);
+  if (!doneAlready) {
+    await caption('The model is still working — the interface simply shows the elapsed time. Real-model latency is part of the honest picture: a few seconds per analysis, persisted once, reviewable forever.', { kicker: kLive, key: 'live-still' });
+  }
+  await waitForAnalysis(pending);
+  await scrollTo(ai, 'start');
+  const meta = (await ai.locator('.analysis-banner-meta').first().textContent()) || '';
+  const model = meta.match(/claude[a-z0-9.-]*/); // lowercase only: stops before the adjacent "Requested by"
+
+  await caption(`${await currentLevel()} — produced by ${model ? model[0] : 'the real model'}, in the same banner, with its own findings, recommendations and policy citations, validated the same way.`, { kicker: kLive, key: 'live-result' });
+  await scrollTo(ai.locator('.finding-detail').first(), 'center');
+  await sleep(4500);
+  const cited = ai.locator('.policy-excerpt').first();
+  if (await cited.count()) { await scrollTo(cited, 'center'); await sleep(3500); }
+  await scrollTo(ai, 'start');
+  await caption('The history now lists both: the deterministic stub runs and the Claude run, each recording which model produced it.', { kicker: kLive, key: 'live-history' });
+  await clearCaption();
+  await sleep(600);
 }
 
 // ---------------------------------------------------------------- main
 
 async function main() {
   fs.mkdirSync(OUT, { recursive: true });
+  // in live mode start on the stub provider — before the browser exists, so the video and the
+  // timeline clock start together
+  if (LIVE) { switchProvider('stub'); await waitForBackend(); }
   const browser = await chromium.launch();
   const context = await browser.newContext({
     viewport: { width: W, height: H },

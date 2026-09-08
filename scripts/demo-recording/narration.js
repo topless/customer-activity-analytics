@@ -49,6 +49,11 @@ const SLIDES = {
     'required. M-V-N-W verify runs the twenty-one unit tests and the Testcontainers integration test. Set an Anthropic A-P-I ' +
     'key to switch the analysis to Claude. The two demo operators are alice and bob; the eight customers are fictional, ' +
     'and all data is generated. The README covers architecture, design decisions and assumptions.',
+  live:
+    'The stub is the offline default. Setting an Anthropic A-P-I key and restarting the backend switches the very same ' +
+    'pipeline to Claude: no code change, the configuration picks the Anthropic adapter, and the digest, retrieval, prompt, ' +
+    'JSON contract, validation and persistence are all unchanged. The backend is restarting with the key now; then Bob ' +
+    're-runs the analysis on Lukas Weber.',
   closing:
     'Thank you for watching. The repository is on GitHub under topless, slash, customer-activity-analytics. ' +
     'Christos Topaloudis.',
@@ -110,4 +115,32 @@ function spoken(captionText) {
   return text;
 }
 
-module.exports = { SLIDES, spoken };
+// Captions whose on-screen text is built at run time (they quote the actual risk level the
+// model returned). Their narration is outcome-neutral, keyed by id.
+const DYNAMIC = {
+  'analysis-wait':
+    'Clicking Run A-I analysis builds a pseudonymised activity digest, retrieves the relevant policy chunks from ' +
+    'P-G-vector, prompts the model through the L-L-M port, validates the JSON and persists the result. With a real ' +
+    'model this takes a few seconds.',
+  'analysis-banner':
+    'The banner carries the risk level, the timestamp, the transaction count, the model that produced it, and who requested it.',
+  'analysis-recommendations':
+    'Recommendations are concrete next steps, escalation, restrictions, documentation, grounded in the escalation policy ' +
+    'the model was given.',
+  'analysis-elena':
+    'Elena comes out differently: the model weighs the gambling-heavy card use and the burst of declines, and its ' +
+    'recommendations follow from that profile.',
+  'live-wait':
+    'This request now goes to Claude. The model reasons over the pseudonymised digest and the retrieved policy excerpts, ' +
+    'and returns the same JSON structure the stub produces.',
+  'live-still':
+    'The model is still working, and the interface simply shows the elapsed time. Real-model latency is part of ' +
+    'the honest picture: a few seconds per analysis, persisted once, reviewable forever.',
+  'live-result':
+    'The result, produced by the real model, sits in the same banner, with its own findings, recommendations and ' +
+    'policy citations, validated the same way.',
+  'live-history':
+    'And the history now lists both: the deterministic stub runs and the Claude run, each recording which model produced it.',
+};
+
+module.exports = { SLIDES, DYNAMIC, spoken };

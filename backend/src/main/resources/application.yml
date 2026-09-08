@@ -34,7 +34,10 @@ caa:
       api-key: ${ANTHROPIC_API_KEY:}
       base-url: https://api.anthropic.com
       model: ${CAA_ANTHROPIC_MODEL:claude-sonnet-5}
-      max-tokens: 2048
+      # budget for the whole reply; thinking (when enabled) counts against it
+      max-tokens: 8192
+      # extended thinking off by default: predictable latency; enable for deeper analyses
+      thinking: ${CAA_ANTHROPIC_THINKING:false}
   rag:
     top-k: 6
     embedding-dim: 384

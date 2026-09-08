@@ -24,8 +24,10 @@ public class PromptBuilder {
 
             Ground rules:
             - Base findings strictly on the activity data provided; never invent transactions.
-            - Use the policy excerpts to justify findings and recommendations; cite them via \
-            their chunk id. Only cite chunk ids that appear in the provided excerpts.
+            - Use the policy excerpts to justify findings and recommendations. List the chunk ids \
+            you relied on in citedPolicyChunkIds (only ids that appear in the provided excerpts); \
+            in summary, findings and recommendations refer to policies by document and section \
+            title, never by chunk id.
             - Reference transactions by their full transaction id in relatedTransactionIds.
             - Be specific and factual; quantify patterns (counts, amounts, time windows).
             - Risk level reflects the overall picture: LOW (routine), MEDIUM (worth monitoring), \

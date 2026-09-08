@@ -9,13 +9,24 @@ Built for the Swissquote platform-engineering assignment with **Java 17 + Spring
 Hibernate/JPA + PostgreSQL (pgvector) + React/TypeScript** — generated end-to-end with AI
 agents (see [docs/ai-methodology.md](docs/ai-methodology.md)).
 
-[![Watch the demo (13 min, narrated and captioned)](docs/demo/poster.png)](docs/demo/customer-activity-analytics-demo.mp4)
+[![Watch the demo (14 min, narrated and captioned)](docs/demo/poster.png)](docs/demo/customer-activity-analytics-demo.mp4)
 
-<sub>▶ Click the poster to play the 13-minute walkthrough in GitHub's video player · subtitles: [`.srt`](docs/demo/customer-activity-analytics-demo.srt) · re-recordable with [`scripts/demo-recording`](scripts/demo-recording/README.md)</sub>
+<sub>▶ Click the poster to play the 14-minute walkthrough in GitHub's video player — stub analyst first, then the same pipeline switched to Claude live · subtitles: [`.srt`](docs/demo/customer-activity-analytics-demo.srt) · re-recordable with [`scripts/demo-recording`](scripts/demo-recording/README.md)</sub>
 
-![Dashboard](docs/screenshots/dashboard.png)
-
-![AI analysis](docs/screenshots/ai-analysis.png)
+<table>
+  <tr>
+    <td width="50%"><a href="docs/screenshots/customers.png"><img src="docs/screenshots/customers.png" alt="Customer search with live risk scores"></a><br><sub>Customer search — number, name or UUID; live risk score per customer</sub></td>
+    <td width="50%"><a href="docs/screenshots/dashboard.png"><img src="docs/screenshots/dashboard.png" alt="Customer dashboard"></a><br><sub>Dashboard — profile, risk score, activity cards, monthly mix, triggered rules</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><a href="docs/screenshots/transactions.png"><img src="docs/screenshots/transactions.png" alt="Transactions with expanded payment details"></a><br><sub>Transactions — filters, rule annotations, type-specific details per row</sub></td>
+    <td width="50%"><a href="docs/screenshots/analysis-claude.png"><img src="docs/screenshots/analysis-claude.png" alt="AI risk analysis produced by Claude"></a><br><sub>AI risk analysis by Claude — findings, recommendations, cited policies; history with stub and live runs</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><a href="docs/screenshots/analysis-stub.png"><img src="docs/screenshots/analysis-stub.png" alt="AI risk analysis produced by the offline stub"></a><br><sub>The same panel on the offline stub analyst — identical contract, no API key</sub></td>
+    <td width="50%"><a href="docs/screenshots/login.png"><img src="docs/screenshots/login.png" alt="Operator sign-in"></a><br><sub>Operator sign-in — BCrypt operators, stateless JWT, demo credentials one click away</sub></td>
+  </tr>
+</table>
 
 ## Quick start (Docker)
 
@@ -43,7 +54,9 @@ ANTHROPIC_API_KEY=sk-ant-... docker compose up --build
 ```
 
 (`caa.llm.provider` = `auto` | `stub` | `anthropic`; `auto` picks Anthropic
-`claude-sonnet-5` when a key is present. Model id configurable via `CAA_ANTHROPIC_MODEL`.)
+`claude-sonnet-5` when a key is present. Model id configurable via `CAA_ANTHROPIC_MODEL`;
+extended thinking is off by default for predictable latency — `CAA_ANTHROPIC_THINKING=true`
+enables it, with an 8192-token reply budget that covers thinking plus the answer.)
 
 ## Local development
 
@@ -150,8 +163,9 @@ CLAUDE.md   standing agent instructions (part of the AI-methodology deliverable)
 the PostgreSQL database and role, and the `caa-*` container names.
 
 **Recorded demo.** [`docs/demo/customer-activity-analytics-demo.mp4`](docs/demo/customer-activity-analytics-demo.mp4)
-is a narrated, captioned 13-minute walkthrough (login, search, dashboard, transactions, AI
-analyses, second operator, history, plus architecture and methodology slides) with an
+is a narrated, captioned 14-minute walkthrough (login, search, dashboard, transactions, AI
+analyses on the offline stub, second operator, history, then the provider switched on camera
+to Claude for a live analysis, plus architecture and methodology slides) with an
 [`.srt`](docs/demo/customer-activity-analytics-demo.srt) subtitle track. It is generated from
 the running application by `scripts/demo-recording` (Playwright script, rendered slides,
 local Kokoro text-to-speech), so it can be re-recorded at any time; `docs/demo-script.md` is

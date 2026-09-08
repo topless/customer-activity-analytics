@@ -9,6 +9,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.swissquote.caa.config.AppProperties;
 
@@ -20,6 +21,9 @@ public class AnthropicLlmClient implements LlmClient {
 
     private static final Logger log = LoggerFactory.getLogger(AnthropicLlmClient.class);
     private static final String ANTHROPIC_VERSION = "2023-06-01";
+    // No sampling parameters: current Claude models reject `temperature` as deprecated.
+    // Thinking is off by default (config caa.llm.anthropic.thinking): the prompt is already a
+    // structured digest plus policy excerpts, and it keeps latency and cost predictable.
 
     private final RestClient restClient;
     private final AppProperties.Llm.Anthropic config;
@@ -47,6 +51,7 @@ public class AnthropicLlmClient implements LlmClient {
         MessagesRequest body = new MessagesRequest(
             config.model(),
             config.maxTokens(),
+            config.thinking() ? null : new Thinking("disabled"),
             request.systemPrompt(),
             List.of(new Message("user", request.userPrompt())));
         try {
@@ -56,12 +61,20 @@ public class AnthropicLlmClient implements LlmClient {
                 .body(body)
                 .retrieve()
                 .body(MessagesResponse.class);
-            if (response == null || response.content() == null || response.content().isEmpty()
-                || response.content().get(0).text() == null) {
-                throw new LlmException("Anthropic API returned an empty response");
+            // the answer is the first text block; models may emit thinking blocks before it
+            String text = response == null || response.content() == null ? null
+                : response.content().stream()
+                    .filter(block -> "text".equals(block.type()) && block.text() != null)
+                    .map(ContentBlock::text)
+                    .findFirst()
+                    .orElse(null);
+            if (text == null) {
+                throw new LlmException("max_tokens".equals(response == null ? null : response.stopReason())
+                    ? "Anthropic response truncated before the answer (raise caa.llm.anthropic.max-tokens)"
+                    : "Anthropic API returned no text content");
             }
             log.debug("Anthropic call ok: model={}, stop_reason={}", response.model(), response.stopReason());
-            return response.content().get(0).text();
+            return text;
         } catch (RestClientResponseException e) {
             throw new LlmException("Anthropic API error (HTTP " + e.getStatusCode().value() + ")", e);
         } catch (ResourceAccessException e) {
@@ -69,10 +82,15 @@ public class AnthropicLlmClient implements LlmClient {
         }
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     record MessagesRequest(String model,
                            @JsonProperty("max_tokens") int maxTokens,
+                           Thinking thinking,
                            String system,
                            List<Message> messages) {
+    }
+
+    record Thinking(String type) {
     }
 
     record Message(String role, String content) {

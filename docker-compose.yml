@@ -30,6 +30,8 @@ services:
       # stub analyst by default; set ANTHROPIC_API_KEY to use the real model
       CAA_LLM_PROVIDER: ${CAA_LLM_PROVIDER:-auto}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      CAA_ANTHROPIC_MODEL: ${CAA_ANTHROPIC_MODEL:-claude-sonnet-5}
+      CAA_ANTHROPIC_THINKING: ${CAA_ANTHROPIC_THINKING:-false}
       CAA_JWT_SECRET: ${CAA_JWT_SECRET:-dev-only-caa-jwt-signing-secret-change-me}
     ports:
       - "8080:8080"

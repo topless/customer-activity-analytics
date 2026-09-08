@@ -73,7 +73,7 @@ const slides = {
     <h1>Customer Activity Analytics</h1>
     <p class="lead">A customer-care console for reviewing card, payment and crypto activity —
       with a persisted, policy-grounded AI risk analysis.</p>
-    <p class="lead" style="margin-top:34px">Christos Topaloudis · narrated walkthrough, ~13 minutes, captions included</p>
+    <p class="lead" style="margin-top:34px">Christos Topaloudis · narrated walkthrough, ~15 minutes, captions included · includes a live Claude analysis</p>
     ${footer('Spring Boot 3.5 · React 19 · PostgreSQL + pgvector')}`, true),
 
   agenda: () => wrap(`
@@ -162,6 +162,19 @@ const slides = {
       <li>README covers architecture, design decisions and assumptions; <code>docs/</code> has the contract, architecture and methodology notes</li>
     </ul>
     ${footer('github.com/topless/customer-activity-analytics')}`),
+
+  live: () => wrap(`
+    ${brand}
+    <div class="kicker">Same pipeline, real model</div>
+    <h2>Switching the analysis to Claude — one variable, no code change</h2>
+    <pre><b>ANTHROPIC_API_KEY=sk-ant-…</b> docker compose up -d backend</pre>
+    <ul class="big">
+      <li><code>LlmClientConfig</code> selects <code>AnthropicLlmClient</code> whenever a key is configured; the stub stays the offline default.</li>
+      <li>Same digest, same policy retrieval, same prompt and JSON contract, same validation and persistence — only the port's adapter changes.</li>
+      <li>The backend is restarting with the key right now; next, the same operator re-runs the same customer.</li>
+    </ul>
+    <p class="lead" style="margin-top:26px">Model: <code>claude-sonnet-5</code> via the Anthropic Messages API; prompts and raw responses are stored with every run for audit.</p>
+    ${footer('live model')}`),
 
   closing: () => wrap(`
     ${brand}
